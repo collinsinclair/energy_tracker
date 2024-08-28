@@ -14,16 +14,36 @@ class HomeTab extends StatefulWidget {
   HomeTabState createState() => HomeTabState();
 }
 
-class HomeTabState extends State<HomeTab> {
+class HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _entries = [];
   int _remainingCalories = 0;
   double _progressValue = 0.0;
 
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
   @override
   void initState() {
     super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.ease,
+    ).drive(Tween<double>(begin: 0.0, end: _progressValue));
+
     _loadEntries();
     _calculateRemainingCalories();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadEntries() async {
@@ -71,17 +91,27 @@ class HomeTabState extends State<HomeTab> {
       0,
       (sum, item) => sum + (item['calories'] ?? 0) as int,
     );
+
     setState(() {
       _remainingCalories = projectedTotal! + goalDelta - totalEntriesCalories;
+      double newProgressValue;
       if (totalEntriesCalories == 0) {
-        _progressValue = 0.0;
+        newProgressValue = 0.0;
       } else {
-        _progressValue =
+        newProgressValue =
             totalEntriesCalories / (_remainingCalories + totalEntriesCalories);
       }
-      if (_progressValue > 1.0) {
-        _progressValue = 1.0;
+      if (newProgressValue > 1.0) {
+        newProgressValue = 1.0;
       }
+
+      _animation = CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.ease,
+      ).drive(Tween<double>(begin: _progressValue, end: newProgressValue));
+
+      _animationController.forward(from: 0);
+      _progressValue = newProgressValue;
     });
   }
 
@@ -175,8 +205,13 @@ class HomeTabState extends State<HomeTab> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: LinearProgressIndicator(
-              value: _progressValue,
+            child: AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                return LinearProgressIndicator(
+                  value: _animation.value,
+                );
+              },
             ),
           ),
           Expanded(
