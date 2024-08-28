@@ -156,14 +156,12 @@ class HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text('Remaining Calories: $_remainingCalories'),
+      ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
-          Text(
-            'Remaining Calories: $_remainingCalories',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               itemCount: _entries.length + 1,

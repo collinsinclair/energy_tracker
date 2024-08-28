@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: const MyHomePage(title: 'Energy Tracker'),
+      home: const MyHomePage(title: 'Simple Energy Tracker'),
     );
   }
 }
