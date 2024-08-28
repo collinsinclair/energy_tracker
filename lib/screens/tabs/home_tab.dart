@@ -73,8 +73,12 @@ class HomeTabState extends State<HomeTab> {
     );
     setState(() {
       _remainingCalories = projectedTotal! + goalDelta - totalEntriesCalories;
-      _progressValue =
-          totalEntriesCalories / (_remainingCalories + totalEntriesCalories);
+      if (totalEntriesCalories == 0) {
+        _progressValue = 0.0;
+      } else {
+        _progressValue =
+            totalEntriesCalories / (_remainingCalories + totalEntriesCalories);
+      }
       if (_progressValue > 1.0) {
         _progressValue = 1.0;
       }
@@ -169,13 +173,12 @@ class HomeTabState extends State<HomeTab> {
       ),
       body: Column(
         children: [
-          if (_entries.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: LinearProgressIndicator(
-                value: _progressValue,
-              ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: LinearProgressIndicator(
+              value: _progressValue,
             ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _entries.length + 1,
