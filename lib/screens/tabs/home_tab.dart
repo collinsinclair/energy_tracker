@@ -38,7 +38,6 @@ class HomeTabState extends State<HomeTab> {
           return decodedEntry;
         }).toList();
 
-        // Sort entries by timestamp in ascending order
         _entries.sort((a, b) {
           DateTime aTime = DateTime.parse(a['timestamp']);
           DateTime bTime = DateTime.parse(b['timestamp']);
@@ -157,54 +156,55 @@ class HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              'Remaining Calories: $_remainingCalories',
-              style: Theme.of(context).textTheme.headlineMedium,
+      body: Column(
+        children: [
+          const SizedBox(height: 16),
+          Text(
+            'Remaining Calories: $_remainingCalories',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _entries.length + 1,
+              itemBuilder: (context, index) {
+                if (index == _entries.length) {
+                  return const SizedBox(height: 64);
+                }
+                final entry = _entries[index];
+                return ListTile(
+                  title: Text(entry['name']),
+                  subtitle: Text(
+                    entry['timestamp'] != null
+                        ? DateFormat.jm()
+                            .format(DateTime.parse(entry['timestamp']))
+                        : 'No time set',
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('${entry['calories']} cal'),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _showAddEntryDialog(
+                            entryToEdit: entry, index: index),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _confirmDeleteEntry(index),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _entries.length,
-                itemBuilder: (context, index) {
-                  final entry = _entries[index];
-                  return ListTile(
-                    title: Text(entry['name']),
-                    subtitle: Text(
-                      entry['timestamp'] != null
-                          ? DateFormat.jm()
-                              .format(DateTime.parse(entry['timestamp']))
-                          : 'No time set',
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('${entry['calories']} cal'),
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => _showAddEntryDialog(
-                              entryToEdit: entry, index: index),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _confirmDeleteEntry(index),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddEntryDialog(),
-        child: const Icon(Icons.add),
-      ),
+          onPressed: () => _showAddEntryDialog(),
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add)),
     );
   }
 }
