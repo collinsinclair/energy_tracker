@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -200,9 +201,13 @@ class HomeTabState extends State<HomeTab> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () => _showAddEntryDialog(),
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add)),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          _showAddEntryDialog();
+        },
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
