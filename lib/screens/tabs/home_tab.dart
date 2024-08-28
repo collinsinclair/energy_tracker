@@ -17,6 +17,7 @@ class HomeTab extends StatefulWidget {
 class HomeTabState extends State<HomeTab> {
   List<Map<String, dynamic>> _entries = [];
   int _remainingCalories = 0;
+  double _progressValue = 0.0;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class HomeTabState extends State<HomeTab> {
       setState(() {
         _entries = storedEntries.map((entry) {
           final Map<String, dynamic> decodedEntry =
-              Map<String, dynamic>.from(jsonDecode(entry));
+          Map<String, dynamic>.from(jsonDecode(entry));
           if (decodedEntry['timestamp'] == null) {
             decodedEntry['timestamp'] = DateTime.now().toIso8601String();
           }
@@ -57,7 +58,7 @@ class HomeTabState extends State<HomeTab> {
   Future<void> _calculateRemainingCalories() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? projectedTotal =
-        int.tryParse(prefs.getString('projectedTotal') ?? '0');
+    int.tryParse(prefs.getString('projectedTotal') ?? '0');
     if (projectedTotal == null || projectedTotal == 0) {
       int restingCalories =
           int.tryParse(prefs.getString('restingCalories') ?? '0') ?? 0;
@@ -68,10 +69,14 @@ class HomeTabState extends State<HomeTab> {
     int goalDelta = int.tryParse(prefs.getString('goalDelta') ?? '0') ?? 0;
     int totalEntriesCalories = _entries.fold<int>(
       0,
-      (sum, item) => sum + (item['calories'] ?? 0) as int,
+          (sum, item) => sum + (item['calories'] ?? 0) as int,
     );
     setState(() {
       _remainingCalories = projectedTotal! + goalDelta - totalEntriesCalories;
+      _progressValue = totalEntriesCalories / (_remainingCalories + totalEntriesCalories);
+      if (_progressValue > 1.0) {
+        _progressValue = 1.0;
+      }
     });
   }
 
@@ -81,7 +86,7 @@ class HomeTabState extends State<HomeTab> {
         'name': name,
         'calories': calories,
         'timestamp':
-            timestamp?.toIso8601String() ?? DateTime.now().toIso8601String()
+        timestamp?.toIso8601String() ?? DateTime.now().toIso8601String()
       });
     });
     _saveEntries();
@@ -94,7 +99,7 @@ class HomeTabState extends State<HomeTab> {
         'name': name,
         'calories': calories,
         'timestamp':
-            timestamp?.toIso8601String() ?? DateTime.now().toIso8601String()
+        timestamp?.toIso8601String() ?? DateTime.now().toIso8601String()
       };
     });
     _saveEntries();
@@ -163,6 +168,12 @@ class HomeTabState extends State<HomeTab> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: LinearProgressIndicator(
+              value: _progressValue,
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _entries.length + 1,
@@ -176,7 +187,7 @@ class HomeTabState extends State<HomeTab> {
                   subtitle: Text(
                     entry['timestamp'] != null
                         ? DateFormat.jm()
-                            .format(DateTime.parse(entry['timestamp']))
+                        .format(DateTime.parse(entry['timestamp']))
                         : 'No time set',
                   ),
                   trailing: Row(
@@ -202,7 +213,7 @@ class HomeTabState extends State<HomeTab> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          HapticFeedback.mediumImpact();
+          HapticFeedback.lightImpact();
           _showAddEntryDialog();
         },
         shape: const CircleBorder(),

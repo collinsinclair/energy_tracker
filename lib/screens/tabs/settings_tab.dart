@@ -123,7 +123,7 @@ class SettingsTabState extends State<SettingsTab> {
         helperText: helperText,
         helperMaxLines: 2,
       ),
-      keyboardType: TextInputType.number,
+      keyboardType: const TextInputType.numberWithOptions(signed: true),
       validator: validator,
     );
   }
